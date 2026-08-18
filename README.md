@@ -9,13 +9,14 @@ Aplicación web desarrollada con Laravel y MariaDB para registrar y administrar 
 - Validación de datos en el servidor
 - Relación uno a muchos entre categorías y solicitudes
 - Interfaz ordenada y funcional con Blade
+- Protección CSRF en todos los formularios
 
 ## Requisitos
 
 - PHP 8.2+
 - Composer
 - MariaDB / MySQL
-- Node.js (para assets)
+- Node.js (opcional, para assets)
 
 ## Instalación
 
@@ -79,25 +80,58 @@ Aplicación web desarrollada con Laravel y MariaDB para registrar y administrar 
 - created_at
 - updated_at
 
+## Estructura del Proyecto
+
+### Rutas (routes/web.php)
+- `GET /` -> Listado de solicitudes (index)
+- `GET /requests/create` -> Formulario de creación
+- `POST /requests` -> Guardar nueva solicitud (store)
+- `GET /requests/{request}/edit` -> Formulario de edición
+- `PUT /requests/{request}` -> Actualizar solicitud (update)
+- `DELETE /requests/{request}` -> Eliminar solicitud (destroy)
+
+### Controlador (app/Http/Controllers/RequestController.php)
+Maneja toda la lógica del CRUD:
+- `index`: Obtiene las solicitudes con su categoría y aplica filtros si se solicitan.
+- `create`: Pasa las categorías disponibles a la vista.
+- `store`: Valida los datos y crea el registro.
+- `edit`: Pasa la solicitud y categorías a la vista.
+- `update`: Valida los datos y actualiza el registro.
+- `destroy`: Elimina el registro de forma segura.
+
+### Vistas (resources/views/requests/)
+- `layout.blade.php`: Plantilla principal con estilos básicos y estructura HTML.
+- `index.blade.php`: Tabla de listado con formulario de filtros y botones de acción.
+- `create.blade.php`: Formulario para registrar nuevas solicitudes con validación de errores.
+- `edit.blade.php`: Formulario prellenado para modificar solicitudes existentes.
+
 ## Funcionalidades
 
-1. **Listado de solicitudes**: Muestra todas las solicitudes con ID, título, categoría, estado, fecha y acciones
-2. **Crear solicitud**: Formulario con validación para registrar nuevas solicitudes
-3. **Editar solicitud**: Modificar solicitudes existentes
-4. **Eliminar solicitud**: Eliminar solicitudes con confirmación
-5. **Filtros**: Filtrar por categoría o estado
+1. **Listado de solicitudes**: Muestra todas las solicitudes con ID, título, categoría (obtenida vía relación Eloquent), estado, fecha y acciones.
+2. **Crear solicitud**: Formulario con validación en servidor para registrar nuevas solicitudes.
+3. **Editar solicitud**: Modificación de solicitudes existentes con validación de datos.
+4. **Eliminar solicitud**: Eliminación segura mediante petición DELETE y confirmación en el frontend.
+5. **Filtros**: Filtrado dinámico por categoría o estado mediante consultas Eloquent construidas condicionalmente.
 
-## Categorías Iniciales
+## Categorías Iniciales (Seeder)
 
 - Hardware
 - Software
 - Redes
 - Accesos
 
+## Detalles Técnicos Cumplidos
+
+- Uso de migraciones para la creación del esquema de base de datos.
+- Modelos Eloquent con relación `belongsTo` (Request) y `hasMany` (Category).
+- Validación de formularios en el controlador (`required`, `exists:categories,id`, `in:pending,in_progress,resolved`).
+- Protección CSRF en todos los formularios mediante directiva `@csrf`.
+- Uso de `@method('PUT')` y `@method('DELETE')` para las peticiones de actualización y eliminación.
+- Separación clara de responsabilidades entre rutas, controlador, modelos y vistas.
+
 ## Tecnologías
 
 - Laravel 11
 - MariaDB
-- Blade (vistas)
+- Blade (motor de plantillas)
 - HTML/CSS básico
-
